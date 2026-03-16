@@ -7,7 +7,7 @@
 <style>
 
 body{
-font-family: Arial;
+font-family:Arial;
 background:#0f172a;
 color:white;
 display:flex;
@@ -22,11 +22,7 @@ background:#1e293b;
 padding:40px;
 border-radius:12px;
 width:720px;
-box-shadow:0 0 30px rgba(0,0,0,0.4);
-}
-
-h1{
-margin-top:0;
+box-shadow:0 0 25px rgba(0,0,0,0.4);
 }
 
 .option{
@@ -41,6 +37,14 @@ cursor:pointer;
 background:#475569;
 }
 
+.correct{
+background:#22c55e;
+}
+
+.wrong{
+background:#ef4444;
+}
+
 button{
 background:#38bdf8;
 border:none;
@@ -48,6 +52,13 @@ padding:10px 20px;
 border-radius:8px;
 margin-top:20px;
 cursor:pointer;
+}
+
+.feedback{
+margin-top:20px;
+padding:15px;
+background:#020617;
+border-radius:8px;
 }
 
 .progress{
@@ -60,23 +71,13 @@ margin-bottom:20px;
 .bar{
 height:10px;
 background:#38bdf8;
-width:25%;
+width:0%;
 border-radius:10px;
 transition:0.3s;
 }
 
-.feedback{
-margin-top:20px;
-padding:10px;
-background:#020617;
-border-radius:8px;
-}
-
-.hidden{
-display:none;
-}
-
 </style>
+
 </head>
 
 <body>
@@ -84,18 +85,18 @@ display:none;
 <div class="container">
 
 <div class="progress">
-<div class="bar" id="progress"></div>
+<div class="bar" id="progressBar"></div>
 </div>
 
-<h1 id="questionTitle">Pergunta 1</h1>
+<h2 id="questionTitle"></h2>
 
 <div id="question"></div>
 
 <div id="options"></div>
 
-<div id="feedback" class="feedback hidden"></div>
+<div id="feedback" class="feedback"></div>
 
-<button id="nextBtn" class="hidden" onclick="nextQuestion()">Próxima</button>
+<button id="nextBtn" onclick="nextQuestion()" style="display:none;">Próxima pergunta</button>
 
 </div>
 
@@ -104,59 +105,62 @@ display:none;
 let questions = [
 
 {
-q:"Em produtos digitais, o lançamento de um MVP representa:",
+q:"O que representa o lançamento de um MVP em produtos digitais?",
 options:[
 "O início do processo de aprendizado e melhoria do produto",
-"A versão final e definitiva do produto",
-"A fase em que não são necessárias mudanças",
-"O encerramento do desenvolvimento"
+"A versão final do produto",
+"O encerramento do desenvolvimento",
+"A etapa em que não são necessárias mudanças"
 ],
 correct:0,
-explanation:"Correto! O MVP marca o início do processo de aprendizado, permitindo melhorar o produto com base no uso real."
+explanation:"O MVP marca o início do processo de aprendizado, permitindo melhorar o produto com base no uso real dos usuários."
 },
 
 {
-q:"No ciclo Construir – Medir – Aprender, o que acontece na etapa 'Medir'?",
+q:"No ciclo Construir – Medir – Aprender, o que ocorre na etapa 'Medir'?",
 options:[
 "Implementar novas funcionalidades",
 "Analisar dados e métricas de uso do produto",
-"Encerrar o desenvolvimento do sistema",
-"Adicionar mais tecnologia ao produto"
+"Encerrar o desenvolvimento",
+"Criar novas tecnologias"
 ],
 correct:1,
-explanation:"Correto! A etapa 'Medir' analisa dados de uso para entender como os usuários interagem com o sistema."
+explanation:"Na etapa Medir são analisados dados e métricas para entender como os usuários interagem com o produto."
 },
 
 {
-q:"Qual é o objetivo principal do framework RICE?",
+q:"Para que serve o framework RICE?",
 options:[
-"Criar novas tecnologias para o produto",
-"Priorizar melhorias com base em impacto e esforço",
-"Substituir o feedback dos usuários",
-"Eliminar todas as funcionalidades do sistema"
+"Criar novas tecnologias",
+"Priorizar melhorias com base em alcance, impacto, confiança e esforço",
+"Substituir testes com usuários",
+"Eliminar funcionalidades do sistema"
 ],
 correct:1,
-explanation:"Correto! O framework RICE ajuda a priorizar melhorias considerando alcance, impacto, confiança e esforço."
+explanation:"O framework RICE ajuda a comparar melhorias considerando alcance, impacto, confiança e esforço."
 },
 
 {
-q:"Qual das alternativas representa um exemplo de otimização de produto?",
+q:"Qual situação representa uma otimização de produto?",
 options:[
-"Criar uma nova funcionalidade complexa",
+"Criar muitas novas funcionalidades",
 "Melhorar a usabilidade de uma funcionalidade existente",
 "Encerrar o produto após o lançamento",
-"Remover todas as métricas de uso"
+"Remover todos os dados de uso"
 ],
 correct:1,
-explanation:"Correto! Otimizações melhoram funcionalidades existentes para tornar o produto mais eficiente e fácil de usar."
+explanation:"Otimizações melhoram funcionalidades existentes para tornar o produto mais eficiente e fácil de usar."
 }
 
 ];
 
 let current = 0;
 let score = 0;
+let answered = false;
 
 function loadQuestion(){
+
+answered=false;
 
 let q = questions[current];
 
@@ -164,45 +168,53 @@ document.getElementById("questionTitle").innerText="Pergunta "+(current+1);
 
 document.getElementById("question").innerText=q.q;
 
+document.getElementById("feedback").innerHTML="";
+
+document.getElementById("nextBtn").style.display="none";
+
 let optionsHTML="";
 
 q.options.forEach((opt,i)=>{
 
-optionsHTML+=`<div class="option" onclick="checkAnswer(${i})">${opt}</div>`
+optionsHTML += `<div class="option" onclick="checkAnswer(${i}, this)">${opt}</div>`;
 
 });
 
 document.getElementById("options").innerHTML=optionsHTML;
 
-document.getElementById("feedback").classList.add("hidden");
-
-document.getElementById("nextBtn").classList.add("hidden");
-
-document.getElementById("progress").style.width=((current+1)/questions.length*100)+"%";
+document.getElementById("progressBar").style.width=((current)/questions.length*100)+"%";
 
 }
 
-function checkAnswer(i){
+function checkAnswer(i, element){
+
+if(answered) return;
+
+answered=true;
 
 let q = questions[current];
 
 let feedback=document.getElementById("feedback");
 
-feedback.classList.remove("hidden");
-
 if(i===q.correct){
+
+element.classList.add("correct");
 
 score++;
 
-feedback.innerHTML="✅ Resposta correta!<br><br>"+q.explanation;
+feedback.innerHTML="✅ <b>Resposta correta.</b><br><br>"+q.explanation;
 
 }else{
 
-feedback.innerHTML="❌ Resposta incorreta.<br><br>"+q.explanation;
+element.classList.add("wrong");
+
+document.getElementsByClassName("option")[q.correct].classList.add("correct");
+
+feedback.innerHTML="❌ <b>Resposta incorreta.</b><br><br>"+q.explanation;
 
 }
 
-document.getElementById("nextBtn").classList.remove("hidden");
+document.getElementById("nextBtn").style.display="block";
 
 }
 
@@ -210,7 +222,7 @@ function nextQuestion(){
 
 current++;
 
-if(current<questions.length){
+if(current < questions.length){
 
 loadQuestion();
 
@@ -224,8 +236,7 @@ showResult();
 
 function showResult(){
 
-document.querySelector(".container").innerHTML=`
-
+document.querySelector(".container").innerHTML = `
 <h1>Resultado Final</h1>
 
 <p>Você acertou <b>${score}</b> de ${questions.length} perguntas.</p>
@@ -233,7 +244,6 @@ document.querySelector(".container").innerHTML=`
 <p>Produtos digitais evoluem continuamente por meio de iteração, análise de dados e priorização de melhorias.</p>
 
 <button onclick="location.reload()">Refazer atividade</button>
-
 `;
 
 }
