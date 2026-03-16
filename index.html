@@ -1,46 +1,198 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Desafio de Produto com IA</title>
+<meta charset="UTF-8">
+<title>Desafio Produto de IA</title>
+
 <style>
+
 body{
 font-family: Arial;
-max-width:800px;
-margin:auto;
-padding:40px;
+background:#0f172a;
+color:white;
+display:flex;
+justify-content:center;
+align-items:center;
+height:100vh;
+margin:0;
 }
+
+.container{
+background:#1e293b;
+padding:40px;
+border-radius:12px;
+width:700px;
+box-shadow:0 0 30px rgba(0,0,0,0.4);
+}
+
+h1{
+margin-top:0;
+}
+
 textarea{
 width:100%;
-height:100px;
+height:80px;
+border-radius:8px;
+border:none;
+padding:10px;
 margin-top:10px;
 }
+
 button{
-padding:10px 20px;
-margin-top:20px;
+background:#38bdf8;
+border:none;
+padding:12px 20px;
+border-radius:8px;
 font-size:16px;
+margin-top:20px;
+cursor:pointer;
 }
+
+button:hover{
+background:#0ea5e9;
+}
+
+.progress{
+height:10px;
+background:#334155;
+border-radius:10px;
+margin-bottom:20px;
+}
+
+.bar{
+height:10px;
+background:#38bdf8;
+width:25%;
+border-radius:10px;
+transition:0.3s;
+}
+
+.hidden{
+display:none;
+}
+
+.result{
+font-size:20px;
+text-align:center;
+}
+
 </style>
+
 </head>
 
 <body>
 
-<h1>🚀 Desafio: Seu Produto de IA se Explica Sozinho?</h1>
+<div class="container">
 
-<p>Qual é o resultado principal que o usuário deve alcançar em poucos minutos?</p>
+<div class="progress">
+<div class="bar" id="progressBar"></div>
+</div>
 
-<textarea placeholder="Escreva sua resposta..."></textarea>
+<h1 id="title">Missão 1: Resultado do Produto</h1>
 
-<p>Quais três funcionalidades você manteria?</p>
+<div id="step1">
 
-<textarea placeholder="Funcionalidades..."></textarea>
+<p>Qual resultado o usuário deve alcançar em poucos minutos usando seu produto?</p>
 
-<p>O produto entregou valor sem explicações?</p>
+<textarea id="answer1"></textarea>
 
-<textarea placeholder="Explique..."></textarea>
+<button onclick="nextStep(2)">Próxima missão</button>
 
-<button onclick="alert('Resposta registrada!')">
-Enviar reflexão
-</button>
+</div>
+
+<div id="step2" class="hidden">
+
+<p>Agora imagine que você só pode manter <b>3 funcionalidades</b>. Quais seriam?</p>
+
+<textarea id="answer2"></textarea>
+
+<button onclick="nextStep(3)">Continuar</button>
+
+</div>
+
+<div id="step3" class="hidden">
+
+<p>Se alguém usasse seu produto sem explicação, onde essa pessoa poderia se confundir?</p>
+
+<textarea id="answer3"></textarea>
+
+<button onclick="nextStep(4)">Continuar</button>
+
+</div>
+
+<div id="step4" class="hidden">
+
+<p>O produto entregaria valor mesmo sem explicação?</p>
+
+<textarea id="answer4"></textarea>
+
+<button onclick="showResult()">Finalizar desafio</button>
+
+</div>
+
+<div id="result" class="hidden result">
+
+🎉 Desafio concluído!
+
+<p id="feedback"></p>
+
+<button onclick="location.reload()">Refazer desafio</button>
+
+</div>
+
+</div>
+
+<script>
+
+function nextStep(step){
+
+document.querySelectorAll('[id^="step"]').forEach(el=>el.classList.add("hidden"));
+
+document.getElementById("step"+step).classList.remove("hidden");
+
+let percent = step*25;
+
+document.getElementById("progressBar").style.width = percent+"%";
+
+const titles = {
+2:"Missão 2: Foco no Essencial",
+3:"Missão 3: Teste do Usuário",
+4:"Missão 4: Reflexão Final"
+};
+
+document.getElementById("title").innerText = titles[step];
+
+}
+
+function showResult(){
+
+document.querySelectorAll('[id^="step"]').forEach(el=>el.classList.add("hidden"));
+
+document.getElementById("title").innerText="Resultado do Desafio";
+
+document.getElementById("progressBar").style.width="100%";
+
+document.getElementById("result").classList.remove("hidden");
+
+let answer = document.getElementById("answer4").value.toLowerCase();
+
+let feedback;
+
+if(answer.includes("sim")){
+
+feedback="Excelente! Isso indica que o produto tem clareza e entrega valor rapidamente ao usuário.";
+
+}else{
+
+feedback="Ótima reflexão. Talvez seja necessário simplificar a experiência ou melhorar a clareza do fluxo do produto.";
+
+}
+
+document.getElementById("feedback").innerText=feedback;
+
+}
+
+</script>
 
 </body>
 </html>
