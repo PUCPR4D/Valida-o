@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Desafio Produto de IA</title>
+<title>Quiz Interativo – Evolução de Produtos Digitais</title>
 
 <style>
 
@@ -21,7 +21,7 @@ margin:0;
 background:#1e293b;
 padding:40px;
 border-radius:12px;
-width:700px;
+width:720px;
 box-shadow:0 0 30px rgba(0,0,0,0.4);
 }
 
@@ -29,27 +29,25 @@ h1{
 margin-top:0;
 }
 
-textarea{
-width:100%;
-height:80px;
+.option{
+background:#334155;
+padding:12px;
 border-radius:8px;
-border:none;
-padding:10px;
-margin-top:10px;
+margin:10px 0;
+cursor:pointer;
+}
+
+.option:hover{
+background:#475569;
 }
 
 button{
 background:#38bdf8;
 border:none;
-padding:12px 20px;
+padding:10px 20px;
 border-radius:8px;
-font-size:16px;
 margin-top:20px;
 cursor:pointer;
-}
-
-button:hover{
-background:#0ea5e9;
 }
 
 .progress{
@@ -67,17 +65,18 @@ border-radius:10px;
 transition:0.3s;
 }
 
+.feedback{
+margin-top:20px;
+padding:10px;
+background:#020617;
+border-radius:8px;
+}
+
 .hidden{
 display:none;
 }
 
-.result{
-font-size:20px;
-text-align:center;
-}
-
 </style>
-
 </head>
 
 <body>
@@ -85,112 +84,161 @@ text-align:center;
 <div class="container">
 
 <div class="progress">
-<div class="bar" id="progressBar"></div>
+<div class="bar" id="progress"></div>
 </div>
 
-<h1 id="title">Missão 1: Resultado do Produto</h1>
+<h1 id="questionTitle">Pergunta 1</h1>
 
-<div id="step1">
+<div id="question"></div>
 
-<p>Qual resultado o usuário deve alcançar em poucos minutos usando seu produto?</p>
+<div id="options"></div>
 
-<textarea id="answer1"></textarea>
+<div id="feedback" class="feedback hidden"></div>
 
-<button onclick="nextStep(2)">Próxima missão</button>
-
-</div>
-
-<div id="step2" class="hidden">
-
-<p>Agora imagine que você só pode manter <b>3 funcionalidades</b>. Quais seriam?</p>
-
-<textarea id="answer2"></textarea>
-
-<button onclick="nextStep(3)">Continuar</button>
-
-</div>
-
-<div id="step3" class="hidden">
-
-<p>Se alguém usasse seu produto sem explicação, onde essa pessoa poderia se confundir?</p>
-
-<textarea id="answer3"></textarea>
-
-<button onclick="nextStep(4)">Continuar</button>
-
-</div>
-
-<div id="step4" class="hidden">
-
-<p>O produto entregaria valor mesmo sem explicação?</p>
-
-<textarea id="answer4"></textarea>
-
-<button onclick="showResult()">Finalizar desafio</button>
-
-</div>
-
-<div id="result" class="hidden result">
-
-🎉 Desafio concluído!
-
-<p id="feedback"></p>
-
-<button onclick="location.reload()">Refazer desafio</button>
-
-</div>
+<button id="nextBtn" class="hidden" onclick="nextQuestion()">Próxima</button>
 
 </div>
 
 <script>
 
-function nextStep(step){
+let questions = [
 
-document.querySelectorAll('[id^="step"]').forEach(el=>el.classList.add("hidden"));
+{
+q:"Em produtos digitais, o lançamento de um MVP representa:",
+options:[
+"O início do processo de aprendizado e melhoria do produto",
+"A versão final e definitiva do produto",
+"A fase em que não são necessárias mudanças",
+"O encerramento do desenvolvimento"
+],
+correct:0,
+explanation:"Correto! O MVP marca o início do processo de aprendizado, permitindo melhorar o produto com base no uso real."
+},
 
-document.getElementById("step"+step).classList.remove("hidden");
+{
+q:"No ciclo Construir – Medir – Aprender, o que acontece na etapa 'Medir'?",
+options:[
+"Implementar novas funcionalidades",
+"Analisar dados e métricas de uso do produto",
+"Encerrar o desenvolvimento do sistema",
+"Adicionar mais tecnologia ao produto"
+],
+correct:1,
+explanation:"Correto! A etapa 'Medir' analisa dados de uso para entender como os usuários interagem com o sistema."
+},
 
-let percent = step*25;
+{
+q:"Qual é o objetivo principal do framework RICE?",
+options:[
+"Criar novas tecnologias para o produto",
+"Priorizar melhorias com base em impacto e esforço",
+"Substituir o feedback dos usuários",
+"Eliminar todas as funcionalidades do sistema"
+],
+correct:1,
+explanation:"Correto! O framework RICE ajuda a priorizar melhorias considerando alcance, impacto, confiança e esforço."
+},
 
-document.getElementById("progressBar").style.width = percent+"%";
+{
+q:"Qual das alternativas representa um exemplo de otimização de produto?",
+options:[
+"Criar uma nova funcionalidade complexa",
+"Melhorar a usabilidade de uma funcionalidade existente",
+"Encerrar o produto após o lançamento",
+"Remover todas as métricas de uso"
+],
+correct:1,
+explanation:"Correto! Otimizações melhoram funcionalidades existentes para tornar o produto mais eficiente e fácil de usar."
+}
 
-const titles = {
-2:"Missão 2: Foco no Essencial",
-3:"Missão 3: Teste do Usuário",
-4:"Missão 4: Reflexão Final"
-};
+];
 
-document.getElementById("title").innerText = titles[step];
+let current = 0;
+let score = 0;
+
+function loadQuestion(){
+
+let q = questions[current];
+
+document.getElementById("questionTitle").innerText="Pergunta "+(current+1);
+
+document.getElementById("question").innerText=q.q;
+
+let optionsHTML="";
+
+q.options.forEach((opt,i)=>{
+
+optionsHTML+=`<div class="option" onclick="checkAnswer(${i})">${opt}</div>`
+
+});
+
+document.getElementById("options").innerHTML=optionsHTML;
+
+document.getElementById("feedback").classList.add("hidden");
+
+document.getElementById("nextBtn").classList.add("hidden");
+
+document.getElementById("progress").style.width=((current+1)/questions.length*100)+"%";
+
+}
+
+function checkAnswer(i){
+
+let q = questions[current];
+
+let feedback=document.getElementById("feedback");
+
+feedback.classList.remove("hidden");
+
+if(i===q.correct){
+
+score++;
+
+feedback.innerHTML="✅ Resposta correta!<br><br>"+q.explanation;
+
+}else{
+
+feedback.innerHTML="❌ Resposta incorreta.<br><br>"+q.explanation;
+
+}
+
+document.getElementById("nextBtn").classList.remove("hidden");
+
+}
+
+function nextQuestion(){
+
+current++;
+
+if(current<questions.length){
+
+loadQuestion();
+
+}else{
+
+showResult();
+
+}
 
 }
 
 function showResult(){
 
-document.querySelectorAll('[id^="step"]').forEach(el=>el.classList.add("hidden"));
+document.querySelector(".container").innerHTML=`
 
-document.getElementById("title").innerText="Resultado do Desafio";
+<h1>Resultado Final</h1>
 
-document.getElementById("progressBar").style.width="100%";
+<p>Você acertou <b>${score}</b> de ${questions.length} perguntas.</p>
 
-document.getElementById("result").classList.remove("hidden");
+<p>Produtos digitais evoluem continuamente por meio de iteração, análise de dados e priorização de melhorias.</p>
 
-let answer = document.getElementById("answer4").value.toLowerCase();
+<button onclick="location.reload()">Refazer atividade</button>
 
-let feedback;
-
-if(answer.includes("sim")){
-
-feedback="Excelente! Isso indica que o produto tem clareza e entrega valor rapidamente ao usuário.";
-
-}else{
-
-feedback="Ótima reflexão. Talvez seja necessário simplificar a experiência ou melhorar a clareza do fluxo do produto.";
+`;
 
 }
 
-document.getElementById("feedback").innerText=feedback;
-
-}
+loadQuestion();
 
 </script>
 
